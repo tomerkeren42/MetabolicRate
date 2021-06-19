@@ -1,5 +1,4 @@
 # MetabolicRate
-# soft-intro-vae-pytorch
 
 <h1 align="center">
   <br>
