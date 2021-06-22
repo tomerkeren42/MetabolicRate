@@ -12,14 +12,14 @@ class DataSet:
 		self.columns = []
 
 	def CreateDataFrame(self):
-		self.df = pd.read_csv(self.dataset_path, na_values=['.', '#NUM!', '#VALUE!'])
+		self.df = pd.read_csv(self.dataset_path, na_values=['.', '#NUM!', '#VALUE!', '#VALUE!'])
 		self.columns = list(self.df.columns.values)
-		print(f"\nCreated DataFrame out of columns: {self.columns}\n")
+		# print(f"\nCreated DataFrame out of columns: {self.columns}\n")
 
 	def CreateSubSetDataFrame(self, columns):
 		self.columns = columns
 		self.df = pd.DataFrame(data=self.df, columns=columns)
-		print(f"\nCreated DataFrame out of columns: {self.columns}\n")
+		# print(f"\nCreated DataFrame out of columns: {self.columns}\n")
 
 	def DataSetSort(self, column, ascending=False):
 		self.df = self.df.sort_values(by=column, ascending=ascending)
@@ -51,7 +51,7 @@ class DataSet:
 		print("\n", self.df.describe())
 
 	def ShowBoxPlot(self):
-		fig, axs = plt.subplots(ncols=7, nrows=1, figsize=(20, 10))
+		fig, axs = plt.subplots(ncols=5, nrows=2, figsize=(20, 15))
 		index = 0
 		axs = axs.flatten()
 		for k, v in self.df.items():
@@ -60,7 +60,7 @@ class DataSet:
 		plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=5.0)
 
 	def ShowDistPlot(self):
-		fig, axs = plt.subplots(ncols=7, nrows=1, figsize=(20, 10))
+		fig, axs = plt.subplots(ncols=5, nrows=2, figsize=(20, 15))
 		index = 0
 		axs = axs.flatten()
 		for k, v in self.df.items():
