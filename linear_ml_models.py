@@ -3,26 +3,20 @@ import time
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-from sklearn import datasets, linear_model
-from scipy import stats
+from sklearn import linear_model
 import numpy as np
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import KFold
+from sklearn.model_selection import cross_val_score, KFold, GridSearchCV, train_test_split
 from sklearn.svm import SVR
-from sklearn.model_selection import GridSearchCV
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.neighbors import KNeighborsRegressor
-from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
 from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import PolynomialFeatures
+from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 
-from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn import metrics
-from sklearn.ensemble import RandomForestRegressor
 
 from xgboost import XGBRegressor
-from sklearn.preprocessing import StandardScaler
 from sklearn import svm
 
 
