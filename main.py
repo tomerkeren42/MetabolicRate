@@ -1,7 +1,7 @@
 from dataset_prepare import DataSet
 from data_analysis import DataAnalyst
 from linear_ml_models import DataMLPredictor
-from dl_model import train, preprocess, run_experiment
+from dl_model import train, preprocess, run_optuna_experiment
 
 import pandas as pd
 import numpy as np
@@ -20,6 +20,8 @@ path_to_dataset = 'dataset/15_6_RMR_ID_cmmon_equations_noID.csv'
 # Add small noise (0.005)
 # relevant paper - https://arxiv.org/abs/2106.11189
 # Don`t normalize target feautres ---> normalizing because if not DL is not working
+# Manipulate data
+
 
 # FINISHED:
 # Use StandarScaler at ML models
@@ -55,12 +57,11 @@ def dataset_ml_prediction():
 
 def dataset_dl_prediction():
 	X_train, X_test, y_train, y_test = preprocess(DataSet.df)
-
-	# return train(X_train, X_test, y_train, y_test)
+	return train(X_train, X_test, y_train, y_test)
 
 
 def run_optuna(df):
-	run_experiment(df)
+	run_optuna_experiment(df)
 
 
 def make_log_file():
@@ -72,21 +73,21 @@ def make_log_file():
 
 
 if __name__ == '__main__':
-	# log_file = make_log_file()
+	log_file = make_log_file()
 
 	DataSet = create_dataset()
-	run_optuna(DataSet.df)
+	# run_optuna(DataSet.df)
 
-	# ml_models_summary = dataset_ml_prediction()
-	# dl_model_summary = dataset_dl_prediction()
-	# ml_models_summary.append(dl_model_summary)
-	# all_models_summary = ml_models_summary
-	# all_models_summary = list(np.round(all_models_summary, decimals=4))
-	# models_summary = pd.DataFrame({'Model': ['Linear Regression', 'Random Forest', 'XGBoost', 'Support Vector Machines', 'Deep Learning'], 'R-squared Score': all_models_summary})
-	# models_summary.sort_values(by='R-squared Score', ascending=False)
-	# print("\n")
-	# print('*' * 125)
-	# print("\n\n", models_summary)
-	# print(
-	# 	f"\nWe've found out that the best model to predict the RMR is: {models_summary.iloc[0][0]} with R-2 Accuracy of {np.round(models_summary.iloc[0][1], 3)}%")
-	# log_file.close()
+	ml_models_summary = dataset_ml_prediction()
+	dl_model_summary = dataset_dl_prediction()
+	ml_models_summary.append(dl_model_summary)
+	all_models_summary = ml_models_summary
+	all_models_summary = list(np.round(all_models_summary, decimals=4))
+	models_summary = pd.DataFrame({'Model': ['Linear Regression', 'Random Forest', 'XGBoost', 'Support Vector Machines', 'Deep Learning'], 'R-squared Score': all_models_summary})
+	models_summary.sort_values(by='R-squared Score', ascending=False)
+	print("\n")
+	print('*' * 125)
+	print("\n\n", models_summary)
+	print(
+		f"\nWe've found out that the best model to predict the RMR is: {models_summary.iloc[0][0]} with R-2 Accuracy of {np.round(models_summary.iloc[0][1], 3)}%")
+	log_file.close()
