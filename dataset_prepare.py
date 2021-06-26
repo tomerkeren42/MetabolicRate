@@ -82,3 +82,11 @@ class DataSet:
 		self.ShowDistPlot()
 		self.ShowBoxPlot()
 		plt.show()
+
+	def AddNoise(self):
+		# TODO: check with and without add noise thing
+		# TODO: check if need to use other sigma? maybe according to columns
+		mu = 0
+		sigma = 1
+		noise = np.random.normal(mu, sigma, self.df.shape)
+		self.df = self.df + noise
