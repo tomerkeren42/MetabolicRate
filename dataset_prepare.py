@@ -56,7 +56,7 @@ class DataSet:
 		print("\n", self.df.describe())
 
 	def ShowBoxPlot(self):
-		fig, axs = plt.subplots(ncols=5, nrows=2, figsize=(20, 15))
+		fig, axs = plt.subplots(ncols=6, nrows=3, figsize=(20, 15))
 		index = 0
 		axs = axs.flatten()
 		for k, v in self.df.items():
@@ -65,7 +65,7 @@ class DataSet:
 		plt.tight_layout(pad=0.4, w_pad=0.5, h_pad=5.0)
 
 	def ShowDistPlot(self):
-		fig, axs = plt.subplots(ncols=5, nrows=2, figsize=(20, 15))
+		fig, axs = plt.subplots(ncols=6, nrows=3, figsize=(20, 15))
 		index = 0
 		axs = axs.flatten()
 		for k, v in self.df.items():
@@ -82,12 +82,3 @@ class DataSet:
 		self.ShowDistPlot()
 		self.ShowBoxPlot()
 		plt.show()
-
-	def AddNoise(self):
-		# TODO: check with and without add noise thing
-		# TODO: check if need to use other sigma? maybe according to columns
-		mu = 0
-		sigma = 1
-		noise = np.random.normal(mu, sigma, self.df.shape)
-		self.df = self.df + noise
-		print("\nAdding Gaussian Noise to make model more robust")
