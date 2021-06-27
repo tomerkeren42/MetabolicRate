@@ -1,11 +1,13 @@
 # MetabolicRate
+<h3 align='center'>
 Predictor Algorithm baseed on multi platform machine learning methods to predict tabular data
+  </h4>
   <p align="center">
     <a href="https://github.com/amirkfir">Amir Kfir</a> •
-    <a href="https://github.com/tomerkeren42">Tomer Keren</a> •
+    <a href="https://github.com/tomerkeren42">Tomer Keren</a>
   </p>
 
-Includes:
+#### Project includes:
 1. DataSet preprocess
 2. Classic Machine Learning algorithms results
 3. Deep Learning Model results
@@ -25,7 +27,7 @@ The api made simple as possible.
 Also added Optuna wrapper - Use the relevant switches in order to ask Optuna to find the best parameters for your model
 
 
-## Running the algorithm ##
+### Running the algorithm ###
 1. Download repo either by pressing "Download ZIP" under the green button or use clone command
 ```
 git clone https://github.com/tomerkeren42/MetabolicRate.git
