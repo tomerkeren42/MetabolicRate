@@ -65,7 +65,23 @@ def normalize_data(data, target=False):
         return data
 
 
-def train(X_train, X_test, y_train, y_test, epochs, lr, h_units, opt_name, dropout):
+def test_only(X_test, y_test, weights_file):
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    model = torch.load(weights_file)
+    print("Loaded model out of weights file successfully!")
+    model.to(device)
+    test_inputs = Variable(torch.FloatTensor(X_test)).to(device)
+    test_labels = Variable(torch.FloatTensor(y_test))
+    final_test_outputs = model(test_inputs)
+    r2_score = metrics.r2_score(test_labels.detach().numpy(), final_test_outputs.detach().numpy())
+    return r2_score * 100
+
+
+def use_model(X_train, X_test, y_train, y_test, epochs, lr, h_units, opt_name, dropout, weights_file):
+    if weights_file != "":
+        test_predict = test_only(X_test, y_test, weights_file)
+        return test_predict
+
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     # Hyper Parameters

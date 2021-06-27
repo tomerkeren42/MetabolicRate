@@ -1,4 +1,4 @@
-from dl_model import train, preprocess, OptunaRunStudy
+from dl_model import use_model, preprocess, OptunaRunStudy
 from linear_ml_models import DataMLPredictor
 from dataset_prepare import DataSet
 
@@ -77,6 +77,8 @@ parser.add_argument('-opt', '--optimizer-name', type=str, choices=["Adam", "RMSp
 parser.add_argument('-d', '--dropout', type=float, default=0.15,
                     help='Probability of dropout layer for turning off neurons in the DL model')
 
+parser.add_argument('-w', '--weights_file', type=str, default="",
+                    help='Path to weight file, if exist')
 args = parser.parse_args()
 
 
@@ -98,49 +100,53 @@ def dataset_ml_prediction():
 	return data_predictor.CompareModels()
 
 
-def dataset_dl_prediction(epochs, lr, h_units, opt_name, dropout):
+def dataset_dl_prediction(epochs, lr, h_units, opt_name, dropout, weights_file):
+	# start deep learning model prediction
 	print("\n")
 	print('*' * 125)
 	print("Starting Deep Learning algorithm for prediction of the 'RMR' feature")
 	print('*' * 125)
 	print("\n")
 
+	# preprocess
 	X_train, X_test, y_train, y_test = preprocess(DataSet.df)
-	return train(X_train, X_test, y_train, y_test, epochs, lr, h_units, opt_name, dropout)
+
+	# train and test
+	dl_preiction = use_model(X_train, X_test, y_train, y_test, epochs, lr, h_units, opt_name, dropout, weights_file)
+	return dl_preiction
 
 
-def run_rmr_predictions(epochs, lr, h_units, opt_name, dropout):
+def run_rmr_predictions(epochs, lr, h_units, opt_name, dropout, weights=None):
+	# Run classic machine learning models
 	ml_models_summary = dataset_ml_prediction()
+	# Run deep learning model
 	dl_model_summary = dataset_dl_prediction(epochs=epochs,
 	                                         lr=lr,
 	                                         h_units=h_units,
 	                                         opt_name=opt_name,
-	                                         dropout=dropout)
+	                                         dropout=dropout,
+	                                         weights_file=weights)
+	# get all models results
 	ml_models_summary.append(dl_model_summary)
+	all_models_summary = list(np.round(ml_models_summary, decimals=4))
+	models_summary = pd.DataFrame({'Model': ['Linear Regression', 'Random Forest', 'XGBoost', 'Support Vector Machines', 'Deep Learning'],
+	                               'R-squared Score': all_models_summary})
 
-	all_models_summary = ml_models_summary
-	all_models_summary = list(np.round(all_models_summary, decimals=4))
-	models_summary = pd.DataFrame(
-		{'Model': ['Linear Regression', 'Random Forest', 'XGBoost', 'Support Vector Machines', 'Deep Learning'],
-		 'R-squared Score': all_models_summary})
-	# TODO: fix values bug
 	models_summary = models_summary.sort_values(by='R-squared Score', ascending=False)
 
+	# print results by format
 	print("\n")
 	print('*' * 125)
 	print("\n\n", models_summary)
-	print(
-		f"\nWe've found out that the best model to predict the RMR is: {models_summary.iloc[0][0]} with R-2 Accuracy of {np.round(models_summary.iloc[0][1], 3)}%")
+	print(f"\nWe've found out that the best model to predict the RMR is: {models_summary.iloc[0][0]} with R-2 Accuracy of {np.round(models_summary.iloc[0][1], 3)}%")
 
 
 if __name__ == '__main__':
-	print(args)
-	exit(0)
+
 	if args.log:
 		log_file = make_log_file()
 
 	DataSet = create_dataset()
-
 	if args.optuna:
 		OptunaRunStudy(data_frame=DataSet.df,
 		               epochs=args.epochs,
@@ -150,7 +156,8 @@ if __name__ == '__main__':
 		                    lr=args.learning_rate,
 		                    h_units=args.hidden_units,
 		                    opt_name=args.optimizer_name,
-		                    dropout=args.dropout)
+		                    dropout=args.dropout,
+		                    weights=args.weights_file)
 
 	if args.log:
 		log_file.close()
