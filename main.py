@@ -1,4 +1,5 @@
-from dl_model import use_model, preprocess, OptunaRunStudy
+from optuna_search import OptunaRunStudy
+from dl_model import use_model, preprocess
 from linear_ml_models import DataMLPredictor
 from dataset_prepare import DataSet
 
@@ -9,28 +10,10 @@ import datetime
 import sys
 import os
 
-columns = ['age', 'RMR', 'Hight(m)', ' Weight(kg)', 'BMI', 'BF(%)', 'FM(kg)', 'FFM(kg)', 'gender']
+# 'Height_Squared', 'Weight_Squared', 'FM_Squared', 'FMM_Squared'
+columns = ['RMR', 'age', 'Height(m)', 'Weight(kg)', 'BMI', 'BF(%)', 'FM(kg)', 'FFM(kg)', 'abdominal(cm)', 'Thyroidism', 'BS(yes/no)', 'diabetes', 'exercise', 'gender', 'No_P_diets', 'Few_P_Diets', 'Alot_P_diets']
 
-path_to_dataset = 'dataset/15_6_RMR_ID_cmmon_equations_noID.csv'
-
-
-# TODO:
-# Check how to complete the missing data in the dataset - data completion. Maybe put some means or min-max or median. Use Tal's feature selection tutorial if nessecary  https://nbviewer.jupyter.org/github/taldatech/cs236756-intro-to-ml/blob/master/cs236756_tutorial_04_pca_feature_selection.ipynb https://scikit-learn.org/stable/modules/feature_selection.html
-# At presentation, explain data
-# Categorial data --> one hot vector
-# relevant paper - https://arxiv.org/abs/2106.11189
-# Don`t normalize target feautres ---> normalizing because if not DL is not working
-# Manipulate data
-
-
-# FINISHED:
-# Use StandarScaler at ML models
-# Example:
-# scaler = StandardScaler()
-# x_train_S = scaler.fit_Transform(X_train)
-# x_test_s = scaler.tranform(X_test)
-# add R-2 square to dl
-# Use Optuna for hyper-parameters search in our deep learning net
+path_to_dataset = 'dataset/15_6_RMR_ID_common_equations_noID_AddNoise.csv'
 
 
 def str2bool(v):
@@ -48,7 +31,7 @@ def make_log_file():
 	if not os.path.isdir('logs'):
 		os.mkdir('logs')
 	log_file = open(
-		'logs/MetabolicRate_' + str(str(datetime.datetime.now()).split(".")[0].replace(":", "-").replace(" ", "_")),
+		'logs/MetabolicRate_' + str(str(datetime.datetime.now()).split(".")[0].replace(":", "-").replace(" ", "_")) + str(".log"),
 		'w')
 	sys.stdout = log_file
 	return log_file
@@ -57,6 +40,10 @@ def make_log_file():
 parser = argparse.ArgumentParser(prog="Detector App", description="Starting Captain's Eye Main Algorithm App!")
 parser.add_argument('-o', '--optuna', action="store_true",
                     help='Run Optuna optimization for detecting best DL model parameters')
+
+parser.add_argument('--study-name', type=str, default='RMR-predict',
+                    help='Run Optuna optimization for detecting best DL model parameters')
+
 parser.add_argument('-t', '--trials', type=int, default=100,
                     help='Number of epoch for Deep Learning Model')
 
@@ -68,13 +55,14 @@ parser.add_argument('-log', '--log', type=str2bool, default=True,
 
 parser.add_argument('-e', '--epochs', type=int, default=5000,
                     help='Number of epoch for Deep Learning Model')
+
 parser.add_argument('-lr', '--learning-rate', type=float, default=0.001,
                     help='Step size for the optimizer which trains the DL model')
-parser.add_argument('-hu', '--hidden-units', type=int, default=2048,
+parser.add_argument('-hu', '--hidden-units', type=int, default=750,
                     help='Number of hidden units in the hidden layer of the DL model')
-parser.add_argument('-opt', '--optimizer-name', type=str, choices=["Adam", "RMSprop", "SGD"], default='SGD',
+parser.add_argument('-opt', '--optimizer-name', type=str, choices=["Adam", "RMSprop", "SGD"], default='Adam',
                     help='Optimizer for training the DL model')
-parser.add_argument('-d', '--dropout', type=float, default=0.15,
+parser.add_argument('-d', '--dropout', type=float, default=0.45,
                     help='Probability of dropout layer for turning off neurons in the DL model')
 
 parser.add_argument('-w', '--weights_file', type=str, default="",
@@ -85,12 +73,12 @@ args = parser.parse_args()
 def create_dataset():
 	prepared_dataset = DataSet(path=path_to_dataset)
 	prepared_dataset.CreateDataFrame()
+	prepared_dataset.CountNaNInColumns()
 	prepared_dataset.CreateSubSetDataFrame(columns=columns)
+	prepared_dataset.PrintDataDescription()
 	prepared_dataset.DropMissingRows()
-	prepared_dataset.PrintDataDescription()
-	prepared_dataset.AddNoise()
-	prepared_dataset.PrintDataDescription()
-	# prepared_dataset.ShowAllPlots()
+	prepared_dataset.ShowAllPlots()
+	exit(0)
 
 	return prepared_dataset
 
@@ -112,13 +100,14 @@ def dataset_dl_prediction(epochs, lr, h_units, opt_name, dropout, weights_file):
 	X_train, X_test, y_train, y_test = preprocess(DataSet.df)
 
 	# train and test
-	dl_preiction = use_model(X_train, X_test, y_train, y_test, epochs, lr, h_units, opt_name, dropout, weights_file)
-	return dl_preiction
+	dl_prediction = use_model(X_train, X_test, y_train, y_test, epochs, lr, h_units, opt_name, dropout, weights_file)
+	return dl_prediction
 
 
 def run_rmr_predictions(epochs, lr, h_units, opt_name, dropout, weights=None):
 	# Run classic machine learning models
 	ml_models_summary = dataset_ml_prediction()
+
 	# Run deep learning model
 	dl_model_summary = dataset_dl_prediction(epochs=epochs,
 	                                         lr=lr,
@@ -150,7 +139,8 @@ if __name__ == '__main__':
 	if args.optuna:
 		OptunaRunStudy(data_frame=DataSet.df,
 		               epochs=args.epochs,
-		               n_trials=args.trials)
+		               n_trials=args.trials,
+		               study_name=args.study_name)
 	else:
 		run_rmr_predictions(epochs=args.epochs,
 		                    lr=args.learning_rate,
