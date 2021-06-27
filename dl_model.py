@@ -18,13 +18,7 @@ class Model(torch.nn.Module):
         self.dropout = torch.nn.Dropout(dropout)
         self.shape_outputs = torch.nn.Linear(hidden_size, 1)
         # TODO: check with and without this initialization
-        torch.nn.init.xavier_uniform_(self.shape_outputs.weight)
-
-        print("\n")
-        print('*' * 125)
-        print("Starting Deep Learning algorithm for prediction of the 'RMR' feature")
-        print('*' * 125)
-        print("\n")
+        # torch.nn.init.xavier_uniform_(self.shape_outputs.weight)
 
     def forward(self, inputs):
         x = inputs
@@ -71,25 +65,19 @@ def normalize_data(data, target=False):
         return data
 
 
-def train(X_train, X_test, y_train, y_test):
+def train(X_train, X_test, y_train, y_test, epochs, lr, h_units, opt_name, dropout):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    # print(device)
 
     # Hyper Parameters
     batch_size = len(X_train)
-    num_epochs = 500
-    learning_rate = 0.0001
-    size_hidden = 4096
-
+    num_epochs = epochs
+    learning_rate = lr
+    size_hidden = h_units
+    optimizer_name = opt_name
+    p_dropout = dropout
     batch_no = len(X_train) // batch_size  # number of batches per epoch
-
-    # Save data for plotting
-    epoch_list = []
-    loss_list = []
-    test_loss_list = []
-
     # Set model
-    model = Model(X_train[0].shape[0], size_hidden, 0.15)
+    model = Model(X_train[0].shape[0], size_hidden, p_dropout)
     model.to(device)
     print(f"Model architecture is: {model}")
     print("\nModel's state_dict:")
@@ -99,11 +87,20 @@ def train(X_train, X_test, y_train, y_test):
     print("total trainable parameters: {}".format(pytorch_total_params))
 
     optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=0.9)
+    # optimizer = getattr(torch.optim, optimizer_name)(model.parameters(), lr=learning_rate)
     # optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+
     loss_function = torch.nn.MSELoss()
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.75)
 
     # Train loop
     running_loss = 0.0
+    # Save data for plotting
+    epoch_list = []
+    loss_list = []
+    test_loss_list = []
+    r2_scores = []
+    print("\nStarting Training:\n")
     for epoch in range(num_epochs):
         # set model in train mode
         model.train()
@@ -141,9 +138,13 @@ def train(X_train, X_test, y_train, y_test):
         test_labels = test_labels.detach().numpy()
         test_outputs = test_outputs.detach().numpy()
         r2_score = metrics.r2_score(test_labels, test_outputs)
+        r2_scores.append(r2_score)
+
         # Print progress
         if epoch % 50 == 0:
-            print('Epoch {}'.format(epoch), "loss: ", np.round(running_loss, 6), "test loss: ", np.round(test_loss, 6), "test R squared score: ", np.round(r2_score*100, 6), "%")
+            print('Epoch {}'.format(epoch), " | lr: ", np.round(scheduler.get_last_lr()[0], 6), " | loss:", np.round(running_loss, 6), " | test loss: ", np.round(test_loss, 6), " | test R squared score: ", np.round(r2_score*100, 6), "%")
+        if epoch % 500 == 0 and 2501 > epoch > 0:
+            scheduler.step()
         # Save data for plotting
         loss_list.append(running_loss)
         test_loss_list.append(test_loss)
@@ -164,12 +165,19 @@ def train(X_train, X_test, y_train, y_test):
         print(var_name, "\t", optimizer.state_dict()[var_name])
 
     torch.save(model.state_dict(), str("model_weights" + str(str(datetime.datetime.now()).split(".")[0].replace(":", "-").replace(" ", "_")) + ".pt"))
-    # TODO: plot those plots
+
     plt.plot(epoch_list, loss_list, label="train loss")
     plt.plot(epoch_list, test_loss_list, label="test loss")
     plt.xlabel("No. of epoch")
     plt.ylabel("Loss")
     plt.title(f"Epochs vs Loss\nModel: Hidden size: {size_hidden} | opt: {'SGD'} | lr: {learning_rate} | batch size: {batch_size} | Loss function: {'MSE'}")
+    plt.legend()
+    plt.show()
+
+    plt.plot(epoch_list, r2_scores, label='r2 vs epochs')
+    plt.xlabel("No. of epoch")
+    plt.ylabel("R Squared score")
+    plt.title("Epochs vs R2 score")
     plt.legend()
     plt.show()
     return r2_score * 100
@@ -194,7 +202,7 @@ def OptunaDefineModel(trial, input_dimensions):
     return torch.nn.Sequential(*layers)
 
 
-def OptunaTrainObjective(trial, df):
+def OptunaTrainObjective(trial, df, epochs):
     X_train, X_test, y_train, y_test = preprocess(df)
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -213,8 +221,7 @@ def OptunaTrainObjective(trial, df):
     optimizer = getattr(torch.optim, optimizer_name)(model.parameters(), lr=lr)
 
     batch_size = len(X_train)
-    # epochs = trial.suggest_int("epochs", 100, 2000)
-    epochs = 100
+    epochs = epochs
     loss_function = torch.nn.MSELoss()
     batch_no = len(X_train) // batch_size  # number of batches per epoch
     running_loss = 0
@@ -264,11 +271,11 @@ def OptunaTrainObjective(trial, df):
     return r2_score
 
 
-def OptunaRunStudy(data_frame):
+def OptunaRunStudy(data_frame, epochs, n_trials):
 
     sampler = optuna.samplers.TPESampler()
     study = optuna.create_study(study_name="RMR-fc", direction="maximize", sampler=sampler)
-    study.optimize(lambda trial: OptunaTrainObjective(trial, data_frame), n_trials=150, timeout=1800)
+    study.optimize(lambda trial: OptunaTrainObjective(trial, data_frame, epochs), n_trials=n_trials, timeout=1800)
 
     pruned_trials = [t for t in study.trials if t.state == optuna.trial.TrialState.PRUNED]
     complete_trials = [t for t in study.trials if t.state == optuna.trial.TrialState.COMPLETE]
@@ -287,9 +294,10 @@ def OptunaRunStudy(data_frame):
     for key, value in trial.params.items():
         print("    {}: {}".format(key, value))
 
-    optuna.visualization.plot_param_importances(study)
-    # TODO: plot those contours
-    optuna.visualization.plot_contour(study, params=["n_units_l0", "dropout_l0"])
-    optuna.visualization.plot_contour(study, params=["n_layers", "lr"])
-    optuna.visualization.plot_contour(study, params=["n_layers", "n_units_l0"])
-    optuna.visualization.plot_contour(study, params=["dropout_l0", "lr"])
+    optuna.visualization.plot_param_importances(study).write_image("param_importance.png")
+    optuna.visualization.plot_optimization_history(study).write_image("optimization_history.png")
+    optuna.visualization.plot_intermediate_values(study).write_image("intermediate_valuse.png")
+
+    optuna.visualization.plot_contour(study, params=["n_units", "dropout"]).write_image("n_units_vs_dropout.png")
+    optuna.visualization.plot_contour(study, params=["n_units", "lr"]).write_image("n_units_vs_lr.png")
+    optuna.visualization.plot_contour(study, params=["lr", "dropout"]).write_image("lr_vs_dropout.png")

@@ -1,17 +1,3 @@
-# from sklearn import preprocessing
-# import time
-# import pandas as pd
-# import seaborn as sns
-# import matplotlib.pyplot as plt
-# from sklearn import linear_model
-# import numpy as np
-# from sklearn.svm import SVR
-# from sklearn.tree import DecisionTreeRegressor
-# from sklearn.neighbors import KNeighborsRegressor
-# from sklearn.pipeline import make_pipeline
-# from sklearn.model_selection import cross_val_score, KFold, GridSearchCV
-# from sklearn.ensemble import GradientBoostingRegressor
-# from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression
 from sklearn import metrics
 from xgboost import XGBRegressor
@@ -42,7 +28,7 @@ class DataMLPredictor:
         return X_train, X_test
 
     def ComputeViaLinearRegressionModel(self, features, target, test_size):
-        print("Computing Linear Regression Model\n")
+        print("\nComputing Linear Regression Model\n")
 
         X_train, X_test, y_train, y_test = train_test_split(features, target, test_size=test_size, random_state=4)
         X_train, X_test = self.standard_scale_data(X_train, X_test)

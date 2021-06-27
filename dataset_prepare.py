@@ -90,3 +90,4 @@ class DataSet:
 		sigma = 1
 		noise = np.random.normal(mu, sigma, self.df.shape)
 		self.df = self.df + noise
+		print("\nAdding Gaussian Noise to make model more robust")
