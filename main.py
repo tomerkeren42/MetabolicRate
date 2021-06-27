@@ -57,8 +57,25 @@ def make_log_file():
 parser = argparse.ArgumentParser(prog="Detector App", description="Starting Captain's Eye Main Algorithm App!")
 parser.add_argument('-o', '--optuna', action="store_true",
                     help='Run Optuna optimization for detecting best DL model parameters')
-parser.add_argument('-l', '--log', type=str2bool, default=True,
+parser.add_argument('-t', '--trials', type=int, default=100,
+                    help='Number of epoch for Deep Learning Model')
+
+parser.add_argument('-p', '--path', type=str, required=False, default='dataset/15_6_RMR_ID_cmmon_equations_noID.csv',
+                    help='Enter path to dataset')
+
+parser.add_argument('-log', '--log', type=str2bool, default=True,
                     help='Write output to new log file at logs/ directory')
+
+parser.add_argument('-e', '--epochs', type=int, default=5000,
+                    help='Number of epoch for Deep Learning Model')
+parser.add_argument('-lr', '--learning-rate', type=float, default=0.001,
+                    help='Step size for the optimizer which trains the DL model')
+parser.add_argument('-hu', '--hidden-units', type=int, default=2048,
+                    help='Number of hidden units in the hidden layer of the DL model')
+parser.add_argument('-opt', '--optimizer-name', type=str, choices=["Adam", "RMSprop", "SGD"], default='SGD',
+                    help='Optimizer for training the DL model')
+parser.add_argument('-d', '--dropout', type=float, default=0.15,
+                    help='Probability of dropout layer for turning off neurons in the DL model')
 
 args = parser.parse_args()
 
@@ -81,22 +98,34 @@ def dataset_ml_prediction():
 	return data_predictor.CompareModels()
 
 
-def dataset_dl_prediction():
+def dataset_dl_prediction(epochs, lr, h_units, opt_name, dropout):
+	print("\n")
+	print('*' * 125)
+	print("Starting Deep Learning algorithm for prediction of the 'RMR' feature")
+	print('*' * 125)
+	print("\n")
+
 	X_train, X_test, y_train, y_test = preprocess(DataSet.df)
-	return train(X_train, X_test, y_train, y_test)
+	return train(X_train, X_test, y_train, y_test, epochs, lr, h_units, opt_name, dropout)
 
 
-def run_rmr_predictions():
+def run_rmr_predictions(epochs, lr, h_units, opt_name, dropout):
 	ml_models_summary = dataset_ml_prediction()
-	dl_model_summary = dataset_dl_prediction()
+	dl_model_summary = dataset_dl_prediction(epochs=epochs,
+	                                         lr=lr,
+	                                         h_units=h_units,
+	                                         opt_name=opt_name,
+	                                         dropout=dropout)
 	ml_models_summary.append(dl_model_summary)
+
 	all_models_summary = ml_models_summary
 	all_models_summary = list(np.round(all_models_summary, decimals=4))
 	models_summary = pd.DataFrame(
 		{'Model': ['Linear Regression', 'Random Forest', 'XGBoost', 'Support Vector Machines', 'Deep Learning'],
 		 'R-squared Score': all_models_summary})
 	# TODO: fix values bug
-	models_summary.sort_values(by='R-squared Score', ascending=False)
+	models_summary = models_summary.sort_values(by='R-squared Score', ascending=False)
+
 	print("\n")
 	print('*' * 125)
 	print("\n\n", models_summary)
@@ -104,20 +133,24 @@ def run_rmr_predictions():
 		f"\nWe've found out that the best model to predict the RMR is: {models_summary.iloc[0][0]} with R-2 Accuracy of {np.round(models_summary.iloc[0][1], 3)}%")
 
 
-def run_optuna(df):
-	OptunaRunStudy(df)
-
-
 if __name__ == '__main__':
+	print(args)
+	exit(0)
 	if args.log:
 		log_file = make_log_file()
 
 	DataSet = create_dataset()
 
 	if args.optuna:
-		run_optuna(DataSet.df)
+		OptunaRunStudy(data_frame=DataSet.df,
+		               epochs=args.epochs,
+		               n_trials=args.trials)
 	else:
-		run_rmr_predictions()
+		run_rmr_predictions(epochs=args.epochs,
+		                    lr=args.learning_rate,
+		                    h_units=args.hidden_units,
+		                    opt_name=args.optimizer_name,
+		                    dropout=args.dropout)
 
 	if args.log:
 		log_file.close()
