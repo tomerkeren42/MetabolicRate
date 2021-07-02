@@ -36,32 +36,30 @@ git clone https://github.com/tomerkeren42/MetabolicRate.git
 ```
 pip install -r requirements.txt
 ```
-3. Add Tabular DataSet
+3. Add Tabular DataSet to dedicated path:
 ```
-Path: MetablicRate/dataset/
+MetablicRate/dataset/
 ```
 4. Run python main.py -h and follow instructions for your own use
 ```
-  -h, --help            
-                        show this help message and exit
-  -o, --optuna          
-                        Run Optuna optimization for detecting best DL model parameters
-  -t TRIALS, --trials TRIALS
-                        Number of epoch for Deep Learning Model
-  -p PATH, --path PATH  
-                        Enter path to dataset
-  -log LOG, --log LOG  
-                        Write output to new log file at logs/ directory
-  -e EPOCHS, --epochs EPOCHS
-                        Number of epoch for Deep Learning Model
-  -lr LEARNING_RATE, --learning-rate LEARNING_RATE
-                        Step size for the optimizer which trains the DL model
-  -hu HIDDEN_UNITS, --hidden-units HIDDEN_UNITS
-                        Number of hidden units in the hidden layer of the DL model
-  -opt {Adam,RMSprop,SGD}, --optimizer-name {Adam,RMSprop,SGD}
-                        Optimizer for training the DL model
-  -d DROPOUT, --dropout DROPOUT
-                        Probability of dropout layer for turning off neurons in the DL model
+usage: RMR Predictor -p PATH [-h] [-o] [--study-name STUDY_NAME] [--trials TRIALS]  [--log LOG] [--epochs EPOCHS] [--learning-rate LEARNING_RATE] [--hidden-units HIDDEN_UNITS] [--optimizer-name {Adam,RMSprop,SGD}] [--dropout DROPOUT] [--weights_file WEIGHTS_FILE]
 
+Starting RMR predictor tool - trainable deep learning net, which is compared to other ML algorithms
+
+positional arguments:
+  -p PATH, --path   Enter path to dataset
+optional arguments:
+  -h, --help            show this help message and exit
+  -o, --optuna          Run Optuna optimization for detecting best DL model parameters
+  --study-name          Run Optuna optimization for detecting best DL model parameters
+  --trials              Number of epoch for Deep Learning Model
+  --log                 Write output to new log file at logs/ directory
+  --epochs              Number of epoch for Deep Learning Model
+  --learning-rate       Step size for the optimizer which trains the DL model
+  --hidden-units        Number of hidden units in the hidden layer of the DL model
+  --optimizer-name {Adam,RMSprop,SGD}
+                        Optimizer for training the DL model
+  --dropout             Probability of dropout layer for turning off neurons in the DL model
+  --weights_file        Path to weight file, if exist and do not want to train new net
 ```
 5.Enjoy!
