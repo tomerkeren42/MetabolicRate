@@ -66,7 +66,7 @@ def preprocess(raw_data):
     X = raw_data.drop('RMR', axis=1)
     y = raw_data.RMR
 
-    X_train, X_test, y_train, y_test = train_test_split(df_to_tensor(X), df_to_tensor(y), test_size=0.2, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(df_to_tensor(X), df_to_tensor(y), test_size=0.25, random_state=42)
 
     X_train = normalize_data(X_train)
     X_test = normalize_data(X_test)
@@ -96,7 +96,7 @@ def use_model(X_train, X_test, y_train, y_test, epochs, lr, h_units, opt_name, d
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     # Hyper Parameters
-    batch_size = 256
+    batch_size = 512
     num_epochs = epochs
     learning_rate = lr
     size_hidden = h_units
@@ -199,18 +199,54 @@ def use_model(X_train, X_test, y_train, y_test, epochs, lr, h_units, opt_name, d
 
     torch.save(model.state_dict(), str("model_weights" + str(str(datetime.datetime.now()).split(".")[0].replace(":", "-").replace(" ", "_")) + ".pt"))
 
-    plt.plot(epoch_list, loss_list, label="train loss")
-    plt.plot(epoch_list, test_loss_list, label="test loss")
-    plt.xlabel("No. of epoch")
-    plt.ylabel("Loss")
-    plt.title(f"Epochs vs Loss\nModel: Hidden size: {size_hidden} | opt: {'SGD'} | lr: {learning_rate} | batch size: {batch_size} | Loss function: {'MSE'}")
-    plt.legend()
-    plt.savefig("Loss_VS_Epochs.png")
+    # plt.plot(epoch_list, loss_list, label="train loss")
+    # plt.plot(epoch_list, test_loss_list, label="test loss")
+    # plt.xlabel("No. of epoch")
+    # plt.ylabel("Loss")
+    # plt.title(f"Epochs vs Loss\nModel: Hidden size: {size_hidden} | opt: {'SGD'} | lr: {learning_rate} | batch size: {batch_size} | Loss function: {'MSE'}")
+    # plt.legend()
+    # plt.savefig("Loss_VS_Epochs.png")
 
-    plt.plot(epoch_list, r2_scores, label='r2 vs epochs')
-    plt.xlabel("No. of epoch")
-    plt.ylabel("R Squared score")
-    plt.title("Epochs vs R2 score")
+    data1 = np.asarray(final_test_outputs).squeeze()
+    data1 = data1*target_std + target_mean
+    data2 = np.asarray(test_labels)
+    data2 = data2*target_std + target_mean
+    mean = np.mean([data1, data2], axis=0)
+    diff = data1 - data2  # Difference between data1 and data2
+    md = np.mean(diff)  # Mean of the difference
+    sd = np.std(diff, axis=0)  # Standard deviation of the difference
+
+    plt.scatter(mean, diff)
+
+    plt.axhline(md, color='gray', linestyle='--')
+    plt.axhline(md + 1.96 * sd, color='gray', linestyle='--')
+    plt.axhline(md - 1.96 * sd, color='gray', linestyle='--')
+    plt.title("Bland Altman plot ")
+    plt.xlabel("Mean of predicted and truth values")
+    plt.ylabel("Difference in prediction and truth values")
     plt.legend()
-    plt.savefig("R_Squared_VS_Epochs.png")
+    plt.show()
+
+    # plt.plot(epoch_list, r2_scores, label='r2 vs epochs')
+    # plt.xlabel("No. of epoch")
+    # plt.ylabel("R Squared score")
+    # plt.title("Epochs vs R2 score")
+    # plt.legend()
+    # plt.savefig("R_Squared_VS_Epochs.png")
     return r2_score * 100
+
+
+def dataset_dl_prediction(epochs, lr, h_units, opt_name, dropout, weights_file):
+	# start deep learning model prediction
+	print("\n")
+	print('*' * 125)
+	print("Starting Deep Learning algorithm for prediction of the 'RMR' feature")
+	print('*' * 125)
+	print("\n")
+
+	# preprocess
+	X_train, X_test, y_train, y_test = preprocess(DataSet.df)
+
+	# train and test
+	dl_prediction = use_model(X_train, X_test, y_train, y_test, epochs, lr, h_units, opt_name, dropout, weights_file)
+	return dl_prediction

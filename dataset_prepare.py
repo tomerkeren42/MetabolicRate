@@ -82,3 +82,19 @@ class DataSet:
 		self.ShowDistPlot()
 		self.ShowBoxPlot()
 		plt.show()
+
+
+def create_dataset(args, subset_columns):
+	"""
+	Method for controlling the dataset created
+	:return: the dataset object itself
+	"""
+	prepared_dataset = DataSet(path=args.path)
+	prepared_dataset.CreateDataFrame()
+	prepared_dataset.CountNaNInColumns()
+	prepared_dataset.CreateSubSetDataFrame(columns=subset_columns)
+	prepared_dataset.PrintDataDescription()
+	prepared_dataset.DropMissingRows()
+	# prepared_dataset.ShowAllPlots()
+
+	return prepared_dataset

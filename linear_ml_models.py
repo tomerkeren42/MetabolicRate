@@ -136,13 +136,16 @@ class DataMLPredictor:
     def ComputeViaSVMRegressor(self, features, target, test_size):
         print("Computing SVM Model\n")
 
-        X_train, X_test, y_train, y_test = train_test_split(features, target, test_size=test_size, random_state=4)
-        X_train, X_test = self.standard_scale_data(X_train, X_test)
-
-        self.model = svm.SVR()
-        self.model.fit(X_train, y_train)
-        y_test_pred = self.model.predict(X_test)
-        self.accuracies["acc_svm"] = metrics.r2_score(y_test, y_test_pred)
+    # def ComputeViaSVMRegressor(self, features, target, test_size):
+    #     print("Computing SVM Model\n")
+    #
+    #     X_train, X_test, y_train, y_test = train_test_split(features, target, test_size=test_size, random_state=4)
+    #     X_train, X_test = self.standard_scale_data(X_train, X_test)
+    #
+    #     self.model = svm.SVR()
+    #     self.model.fit(X_train, y_train)
+    #     y_test_pred = self.model.predict(X_test)
+    #     self.accuracies["acc_svm"] = metrics.r2_score(y_test, y_test_pred)
         # y_pred = self.model.predict(X_train)
         # print('R^2:', metrics.r2_score(y_train, y_pred))
         # print('Adjusted R^2:',
@@ -174,6 +177,11 @@ class DataMLPredictor:
         self.ComputeViaLinearRegressionModel(features.copy(), target.copy(), test_set_size)
         self.ComputeViaRandomForestRegressor(features.copy(), target.copy(), test_set_size)
         self.ComputeViaXGBoostRegressor(features.copy(), target.copy(), test_set_size)
-        self.ComputeViaSVMRegressor(features.copy(), target.copy(), test_set_size)
+        # self.ComputeViaSVMRegressor(features.copy(), target.copy(), test_set_size)
 
-        return [self.accuracies["acc_linreg"] * 100, self.accuracies["acc_rf"] * 100, self.accuracies["acc_xgb"] * 100, self.accuracies["acc_svm"] * 100]
+        return [self.accuracies["acc_linreg"] * 100, self.accuracies["acc_rf"] * 100, self.accuracies["acc_xgb"] * 100, self.accuracies["random"] * 100]
+
+
+def dataset_ml_prediction(dataset):
+    data_predictor = DataMLPredictor(dataset.df)
+    return data_predictor.CompareModels()
