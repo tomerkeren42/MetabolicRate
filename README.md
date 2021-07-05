@@ -1,7 +1,8 @@
-# MetabolicRate
+<h1 align='center'> MetabolicRate Predictor
+  </h1>
 <h3 align='center'>
 Predictor Algorithm baseed on multi platform machine learning methods to predict tabular data
-  </h4>
+  </h3>
   <p align="center">
     <a href="https://github.com/amirkfir">Amir Kfir</a> •
     <a href="https://github.com/tomerkeren42">Tomer Keren</a>
@@ -63,5 +64,5 @@ optional arguments:
 ```
 5.Enjoy!
 
-# For more additional help:
+## For more additional help:
  <a href="https://optuna.org/">Optuna</a>  
