@@ -63,3 +63,7 @@ optional arguments:
   --weights_file        Path to weight file, if exist and do not want to train new net
 ```
 5.Enjoy!
+
+# For more additional help:
+ <a href="https://optuna.org/">Optuna</a>  
+ <a href="https://github.com/amirkfir">Amir Kfir</a>
