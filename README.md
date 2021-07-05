@@ -36,6 +36,14 @@ git clone https://github.com/tomerkeren42/MetabolicRate.git
 ```
 pip install -r requirements.txt
 ```
+### Prerequisites
+|Library         | Version |Library         | Version |
+|----------------------|----|----------------------|----|
+|`Python`|  `3.8`|`torch`|  `1.9.0`|
+|`pandas`|  `1.1.3`|`scikit-learn`|  `0.32.2`|
+|`plotly`|  `5.0.0`|`scipy`|  `1.5.2`|
+|`matplotlib`|  `3.3.2`|`xgboost`|  `1.4.2`|
+
 3. Add Tabular DataSet to dedicated path:
 ```
 MetablicRate/dataset/
