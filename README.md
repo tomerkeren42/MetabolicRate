@@ -19,7 +19,7 @@ Predictor Algorithm baseed on multi platform machine learning methods to predict
     <img src="DataSetBite.png"  width="550" height="250">
     </td><th>Data Set Example</th></tr>
   <tr><td>
-<img src="ModelCompare.png"  width="550" height="300">
+<img src="ModelCompare.png"  width="550" height="200">
     </td><th>Results Comparison</th> </tr></table>
 
 ## Training and comparing ##
