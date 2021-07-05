@@ -26,6 +26,14 @@ Predictor Algorithm baseed on multi platform machine learning methods to predict
 The api made simple as possible.
 Also added Optuna wrapper - Use the relevant switches in order to ask Optuna to find the best parameters for your model
 
+### Files in the repository
+|File name         | Purpsoe |
+|----------------------|------|
+|`dataset_prepare.py`| creates DS from CSV file and applying preprocessing|
+|`dl_model.py`| final dl used on the DS|
+|`linear_ml_nodel.py`| linear models that were tested before final model was chosen|
+|`optuna_search.py`| automatic search for best model hyperparameters|
+|`rmr_predictor.py`| supporting file for running algorithm|
 
 ### Running the algorithm ###
 1. Download repo either by pressing "Download ZIP" under the green button or use clone command
