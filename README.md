@@ -15,12 +15,11 @@ Predictor Algorithm baseed on multi platform machine learning methods to predict
 
 <table>
   <tr><td>
-<img src="DataSetBite.png"  width="450" height="300">
-    Data Set Review
-    </td><td>
-<img src="ModelCompare.png"  width="450" height="300">
-    Results Comparison
-    </td> </tr></table>
+    <img src="DataSetBite.png"  width="650" height="250">
+    </td><th>Data Set Example</th></tr>
+  <tr><td>
+<img src="ModelCompare.png"  width="650" height="300">
+    </td><th>Results Comparison</th> </tr></table>
 
 ## Training and comparing ##
 The api made simple as possible.
