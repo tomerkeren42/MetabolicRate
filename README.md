@@ -16,10 +16,10 @@ Predictor Algorithm baseed on multi platform machine learning methods to predict
 
 <table>
   <tr><td>
-    <img src="DataSetBite.png"  width="650" height="250">
+    <img src="DataSetBite.png"  width="550" height="250">
     </td><th>Data Set Example</th></tr>
   <tr><td>
-<img src="ModelCompare.png"  width="650" height="300">
+<img src="ModelCompare.png"  width="550" height="300">
     </td><th>Results Comparison</th> </tr></table>
 
 ## Training and comparing ##
