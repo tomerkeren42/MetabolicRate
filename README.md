@@ -65,4 +65,3 @@ optional arguments:
 
 # For more additional help:
  <a href="https://optuna.org/">Optuna</a>  
- <a href="https://github.com/amirkfir">Amir Kfir</a>
