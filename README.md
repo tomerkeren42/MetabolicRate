@@ -18,7 +18,7 @@ Predictor Algorithm baseed on multi platform machine learning methods to predict
 <img src="DataSetExample.png"  width="450" height="300">
     Data Set Review
     </td><td>
-<img src="ModelComparison.png"  width="450" height="300">
+<img src="ModelCompare.png"  width="450" height="300">
     Results Comparison
     </td> </tr></table>
 
